@@ -4,14 +4,10 @@ using UnityEngine;
 
 public class DontDestroyOnLoad : MonoBehaviour
 {
-    public int obj;
-
     private void Awake()
     {
         GameObject[] objs;
-        if (obj == 0)
-            objs = GameObject.FindGameObjectsWithTag("NGapi");
-        else objs = GameObject.FindGameObjectsWithTag("apiHandler");
+        objs = GameObject.FindGameObjectsWithTag("bgLoop");
         if (objs.Length > 1)
         {
             Destroy(gameObject);

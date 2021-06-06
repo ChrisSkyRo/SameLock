@@ -9,9 +9,13 @@ public class LevelSelectNavigation : MonoBehaviour
     private Color[] colorsArray;
     private GameData data;
     private Transform levelSelect;
+    private int steps;
+    private bool nav;
 
     private void Awake()
     {
+        nav = false;
+        steps = 0;
         levelSelect = GameObject.Find("LevelSelect").GetComponent<Transform>();
         sr = GetComponent<SpriteRenderer>();
         data = GameObject.Find("GameData").GetComponent<GameData>();
@@ -41,29 +45,27 @@ public class LevelSelectNavigation : MonoBehaviour
         if (!data.levelSelectAnimating)
         {
             data.levelSelectAnimating = true;
-            if (direction == "left")
-                StartCoroutine(MoveLeft());
-            else StartCoroutine(MoveRight());
+            steps = 0;
+            nav = true;
         }
     }
 
-    IEnumerator MoveLeft()
+    private void FixedUpdate()
     {
-        for(int i = 15;i > 0; i--)
-        {
+        if (!nav)
+            return;
+
+        if(direction == "left")
             levelSelect.transform.position -= Vector3.left * 2;
-            yield return null;
+        else
+            levelSelect.transform.position += Vector3.left * 2;
+
+        steps++;
+        if (steps == 15)
+        {
+            nav = false;
+            data.levelSelectAnimating = false;
         }
-        data.levelSelectAnimating = false;
     }
 
-    IEnumerator MoveRight()
-    {
-        for (int i = 15; i > 0; i--)
-        {
-            levelSelect.transform.position -= Vector3.right * 2;
-            yield return null;
-        }
-        data.levelSelectAnimating = false;
-    }
 }

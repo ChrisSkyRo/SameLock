@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Gameplay : MonoBehaviour
 {
@@ -17,25 +18,39 @@ public class Gameplay : MonoBehaviour
     private bool levelWon;
 
     // Level properties that are subject to constant change
-    private Transform[,] tiles;         // The gameobjects that make the level
-    private bool AnimatingGameBoard;    // Whether the gameboard is animating or expecting user input
-    private int currentX, currentY;     // Mouse position on gameboard
-    private int falls;                  // Number of falling animations playing
-    private int slides;                 // Number of sliding animations playing
-    private int moves;                  // The number of moves made (used for some Extras levels)
+    [System.NonSerialized] public Transform[,] tiles;       // The gameobjects that composes the level
+    private bool AnimatingGameBoard;                        // Whether the gameboard is animating or expecting user input
+    private int currentX, currentY;                         // Mouse position on gameboard
+    [System.NonSerialized] public int falls;                // Number of falling animations playing
+    [System.NonSerialized] public int slides;               // Number of sliding animations playing
+    private int moves;                                      // The number of moves made (used for some Extras levels)
+    private float timer;                                    // Timer used for Accelerated Learning achievement
 
     private void Awake()
     {
+        timer = 3f;
         levelWon = false;
         AnimatingGameBoard = false;
         currentX = currentY = -1;
         falls = 0;
         slides = 0;
         moves = 0;
+        if (GameObject.Find("GameData").GetComponent<GameData>().LevelToLoad == -1)
+        {
+            TextMeshPro text = GameObject.Find("Instructions").GetComponent<TextMeshPro>();
+            text.alpha = 0;
+            text = GameObject.Find("TextSettings").GetComponent<TextMeshPro>();
+            text.alpha = 0;
+            text = GameObject.Find("TextReset").GetComponent<TextMeshPro>();
+            text.alpha = 0;
+        }
     }
 
     private void Start()
     {
+        // Tutorial instructions
+        if (GameObject.Find("GameData").GetComponent<GameData>().LevelToLoad == -1)
+            StartCoroutine(TextFadeIn());
         // Initialize the colors array
         InitializeColors();
         // Set the color of the game tiles in the matrix
@@ -46,14 +61,32 @@ public class Gameplay : MonoBehaviour
 
     private void Update()
     {
+        timer -= Time.deltaTime;
         if (!AnimatingGameBoard)
         {
             if (!levelWon && levelMatrix[levelHeight - 1, 0] == 0)
             {
-                GameObject.Find("SFXManager").GetComponent<SFXScript>().PlaySFX("win");
                 levelWon = true;
                 Instantiate(win, new Vector3(0, 0, -5), Quaternion.identity);
                 GameData gd = GameObject.Find("GameData").GetComponent<GameData>();
+
+                if(gd.LevelToLoad == -1)
+                {
+                    Destroy(GameObject.Find("Instructions"));
+                    GameObject.Find("SettingsButton").transform.GetChild(0).position += new Vector3(100, 0);
+                    GameObject.Find("ResetButton").transform.GetChild(0).position += new Vector3(100, 0);
+                    gd.AchievementsUnlocked[0] = 1;
+                    PlayerPrefs.SetInt("Achievement0", 1);
+                    if (gd.AchievementsUnlocked[14] == 0 && timer > 0)
+                    {
+                        gd.AchievementsUnlocked[14] = 1;
+                        PlayerPrefs.SetInt("Achievement14", 1);
+                    }
+                    PlayerPrefs.Save();
+
+                    return;
+                }
+
                 gd.LevelsCompleted[gd.LevelToLoad - 1] = 1;
 
                 if (gd.AchievementsUnlocked[1] == 0)
@@ -65,7 +98,6 @@ public class Gameplay : MonoBehaviour
                         {
                             gd.AchievementsUnlocked[1] = 1;
                             PlayerPrefs.SetInt("Achievement1", 1);
-                            GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62022);
                         }
                     }
                 }
@@ -80,7 +112,6 @@ public class Gameplay : MonoBehaviour
                     {
                         gd.AchievementsUnlocked[6] = 1;
                         PlayerPrefs.SetInt("Achievement6", 1);
-                        GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62027);
                     }
                 }
                 // Rising achievement
@@ -94,7 +125,6 @@ public class Gameplay : MonoBehaviour
                     {
                         gd.AchievementsUnlocked[7] = 1;
                         PlayerPrefs.SetInt("Achievement7", 1);
-                        GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62028);
                     }
                 }
                 // To the top achievement
@@ -108,7 +138,6 @@ public class Gameplay : MonoBehaviour
                     {
                         gd.AchievementsUnlocked[8] = 1;
                         PlayerPrefs.SetInt("Achievement8", 1);
-                        GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62029);
                     }
                 }
                 // Extra, extra! achievement
@@ -122,7 +151,6 @@ public class Gameplay : MonoBehaviour
                     {
                         gd.AchievementsUnlocked[9] = 1;
                         PlayerPrefs.SetInt("Achievement9", 1);
-                        GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62030);
                     }
                 }
                 // Completionist achievement
@@ -130,7 +158,6 @@ public class Gameplay : MonoBehaviour
                 {
                     gd.AchievementsUnlocked[10] = 1;
                     PlayerPrefs.SetInt("Achievement10", 1);
-                    GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62031);
                 }
                 // leet achievement
                 if (gd.AchievementsUnlocked[13] == 0)
@@ -142,7 +169,6 @@ public class Gameplay : MonoBehaviour
                     {
                         gd.AchievementsUnlocked[13] = 1;
                         PlayerPrefs.SetInt("Achievement13", 1);
-                        GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62034);
                     }
                 }
 
@@ -155,15 +181,15 @@ public class Gameplay : MonoBehaviour
             if (!tileHover)
                 return;
 
-            HighlightTiles(currentX, currentY);
+            if (!Application.isMobilePlatform)
+                HighlightTiles(currentX, currentY);
 
             if (Input.GetMouseButtonDown(0) && CanDestroyTile(currentX, currentY))
             {
-                GameObject.Find("SFXManager").GetComponent<SFXScript>().PlaySFX("game");
                 AnimatingGameBoard = true;
                 moves++;
                 DestroyTiles(currentX, currentY);
-                StartCoroutine(AnimateGameBoard());
+                AnimateGameBoard();
             }
         }
     }
@@ -185,15 +211,19 @@ public class Gameplay : MonoBehaviour
         };
 
         // Randomize colors array and sprite array
-        for(int i = 1; i < 9; i++)
+        GameData gd = GameObject.Find("GameData").GetComponent<GameData>();
+        if (gd.LevelToLoad > 30 && gd.LevelToLoad <= 45)
         {
-            int j = Random.Range(1, 9);
-            Color temp1 = colorsArray[j];
-            colorsArray[j] = colorsArray[i];
-            colorsArray[i] = temp1;
-            Sprite temp2 = tileSprite[j];
-            tileSprite[j] = tileSprite[i];
-            tileSprite[i] = temp2;
+            for (int i = 1; i < 9; i++)
+            {
+                int j = Random.Range(1, 9);
+                Color temp1 = colorsArray[j];
+                colorsArray[j] = colorsArray[i];
+                colorsArray[i] = temp1;
+                Sprite temp2 = tileSprite[j];
+                tileSprite[j] = tileSprite[i];
+                tileSprite[i] = temp2;
+            }
         }
     }
 
@@ -202,7 +232,22 @@ public class Gameplay : MonoBehaviour
     {
         
         GameData gd = GameObject.Find("GameData").GetComponent<GameData>();
-        if(gd.LevelToLoad == 1)
+        if(gd.LevelToLoad == -1)
+        {
+
+            levelMatrix = new int[,]
+            {
+                { 1, 2, 2},
+                { 1, 3, 3},
+                { 2, 1, 1}
+            };
+            cornerX = -2;
+            cornerY = 3.5f;
+            tileSize = 2;
+            levelHeight = 3;
+            levelWidth = 3;
+        }
+        else if (gd.LevelToLoad == 1)
         {
             levelMatrix = new int[,]
             {
@@ -1280,7 +1325,7 @@ public class Gameplay : MonoBehaviour
                 if (gd.TileStyle == 0)
                     sprite = tileSprite[0];
                 else sprite = tileSprite[levelMatrix[y, x]];
-                gts.Setup(tileSize * 0.625f, colorsArray[levelMatrix[y, x]], sprite);
+                gts.Setup(tileSize, colorsArray[levelMatrix[y, x]], sprite);
             }
     }
 
@@ -1379,40 +1424,26 @@ public class Gameplay : MonoBehaviour
 
         // Up
         if (y > 0 && levelMatrix[y - 1, x] != 0)
-            if (tiles[y - 1, x].GetComponent<SpriteRenderer>().color == Color.white)
+            if (tiles[y - 1, x].GetComponent<SpriteRenderer>().color == tiles[y, x].GetComponent<SpriteRenderer>().color)
                 DestroyTiles(x, y - 1);
         // Left
         if (x > 0 && levelMatrix[y, x - 1] != 0)
-            if (tiles[y, x - 1].GetComponent<SpriteRenderer>().color == Color.white)
+            if (tiles[y, x - 1].GetComponent<SpriteRenderer>().color == tiles[y, x].GetComponent<SpriteRenderer>().color)
                 DestroyTiles(x - 1, y);
         // Right
         if (x < levelWidth - 1 && levelMatrix[y, x + 1] != 0)
-            if (tiles[y, x + 1].GetComponent<SpriteRenderer>().color == Color.white)
+            if (tiles[y, x + 1].GetComponent<SpriteRenderer>().color == tiles[y, x].GetComponent<SpriteRenderer>().color)
                 DestroyTiles(x + 1, y);
         // Down
         if (y < levelHeight - 1 && levelMatrix[y + 1, x] != 0)
-            if (tiles[y + 1, x].GetComponent<SpriteRenderer>().color == Color.white)
+            if (tiles[y + 1, x].GetComponent<SpriteRenderer>().color == tiles[y, x].GetComponent<SpriteRenderer>().color)
                 DestroyTiles(x, y + 1);
 
-        StartCoroutine(TileFade(x, y));
-    }
-
-    // The game tile fades out then it is destroyed
-    IEnumerator TileFade(int x, int y)
-    {
-        SpriteRenderer sr = tiles[y, x].GetComponent<SpriteRenderer>();
-        Color alpha = sr.color;
-        for (float f = 1f; f > 0; f -= 0.1f)
-        {
-            alpha.a = f;
-            sr.color = alpha;
-            yield return null;
-        }
-        Destroy(tiles[y, x].gameObject);
+        tiles[y, x].GetComponent<GameTileScript>().Fade = true;
     }
 
     // Handles the falling and the sliding of the game tiles
-    IEnumerator AnimateGameBoard()
+    void AnimateGameBoard()
     {
         // Camera rotation for certain levels
         GameData gd = GameObject.Find("GameData").GetComponent<GameData>();
@@ -1440,15 +1471,19 @@ public class Gameplay : MonoBehaviour
         {
             StartCoroutine(RotateGameBoard((Random.value > 0.5f), Random.Range(1, 5), Random.Range(1, 270)));
         }
+    }
 
-        while (TilesFall())
-            while (falls > 0)
-                yield return null;
-        while (TilesSlide())
-            while (slides > 0)
-                yield return null;
-        
-        AnimatingGameBoard = false;
+    private void FixedUpdate()
+    {
+        if (!AnimatingGameBoard)
+            return;
+
+        if (falls > 0 || slides > 0)
+            return;
+
+        if (!TilesFall() && !TilesSlide())
+            AnimatingGameBoard = false;
+
     }
 
     // Handles the falling of the game tiles and triggers the falling animation
@@ -1464,7 +1499,8 @@ public class Gameplay : MonoBehaviour
                     falls++;
                     levelMatrix[y + 1, x] = levelMatrix[y, x];
                     levelMatrix[y, x] = 0;
-                    StartCoroutine(TileFall(x, y));
+                    tiles[y, x].GetComponent<GameTileScript>().Fall = true;
+                    tiles[y + 1, x] = tiles[y, x];
                 }
 
         return fall;
@@ -1483,38 +1519,11 @@ public class Gameplay : MonoBehaviour
                     slides++;
                     levelMatrix[y, x - 1] = levelMatrix[y, x];
                     levelMatrix[y, x] = 0;
-                    StartCoroutine(TileSlide(x, y));
+                    tiles[y, x].GetComponent<GameTileScript>().Slide = true;
+                    tiles[y, x - 1] = tiles[y, x];
                 }
 
         return slide;
-    }
-
-    // Animates the falling of a game tile
-    IEnumerator TileFall(int x, int y)
-    {
-        Transform board = GameObject.Find("GameBoard").GetComponent<Transform>();
-        float fallSpeed = tileSize / 10;
-        for (float i = 10; i > 0; i--)
-        {
-            tiles[y, x].position -= board.up * fallSpeed;
-            yield return null;
-        }
-        tiles[y + 1, x] = tiles[y, x];
-        falls--;
-    }
-
-    // Animates the sliding of a game tile to the left
-    IEnumerator TileSlide(int x, int y)
-    {
-        Transform board = GameObject.Find("GameBoard").GetComponent<Transform>();
-        float slideSpeed = tileSize / 10;
-        for (float i = 10; i > 0; i--)
-        {
-            tiles[y, x].position -= board.right * slideSpeed;
-            yield return null;
-        }
-        tiles[y, x - 1] = tiles[y, x];
-        slides--;
     }
 
     // Animates the rotation of the game board
@@ -1538,6 +1547,30 @@ public class Gameplay : MonoBehaviour
                 board.Rotate(Vector3.forward, rotationSpeed);
                 yield return null;
             }
+        }
+    }
+
+    IEnumerator TextFadeIn()
+    {
+        TextMeshPro text = GameObject.Find("Instructions").GetComponent<TextMeshPro>();
+        for (float i = 0f; i < 1; i += 0.01f)
+        {
+            text.alpha = i;
+            yield return null;
+        }
+        yield return new WaitForSeconds(3);
+        text = GameObject.Find("TextSettings").GetComponent<TextMeshPro>();
+        for (float i = 0f; i < 1; i += 0.01f)
+        {
+            text.alpha = i;
+            yield return null;
+        }
+        yield return new WaitForSeconds(3);
+        text = GameObject.Find("TextReset").GetComponent<TextMeshPro>();
+        for (float i = 0f; i < 1; i += 0.01f)
+        {
+            text.alpha = i;
+            yield return null;
         }
     }
 }

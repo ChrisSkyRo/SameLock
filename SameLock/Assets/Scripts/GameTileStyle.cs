@@ -53,7 +53,6 @@ public class GameTileStyle : MonoBehaviour
         {
             gd.AchievementsUnlocked[11] = 1;
             PlayerPrefs.SetInt("Achievement11", 1);
-            GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62032);
         }
         gd.TileStyle = value;
         PlayerPrefs.SetInt("TileStyle", value);

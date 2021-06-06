@@ -51,7 +51,6 @@ public class TutorialNextLevelButton : MonoBehaviour
 
     private void OnMouseUp()
     {
-        GameObject.Find("SFXManager").GetComponent<SFXScript>().PlaySFX("menu");
         SceneManager.LoadScene(0);
     }
 }

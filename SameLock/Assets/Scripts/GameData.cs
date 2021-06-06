@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class GameData : MonoBehaviour
 {
-    public int SFX, TileStyle;
+    public int TileStyle;
     public int[] LevelsCompleted;
     public int LevelToLoad, currentArt;
     public bool levelSelectAnimating;
     public int[] AchievementsUnlocked;
     public int[] Last4CompletedLevels;
+    public bool Music;
 
     /*
         === Normal Achievements ===
@@ -42,6 +43,7 @@ public class GameData : MonoBehaviour
         LevelToLoad = 0;
         currentArt = 0;
         levelSelectAnimating = false;
+        Music = true;
 
         if (objs.Length > 1)
         {
@@ -49,10 +51,6 @@ public class GameData : MonoBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
-
-        if (!PlayerPrefs.HasKey("SFX"))
-            PlayerPrefs.SetInt("SFX", 1);
-        SFX = PlayerPrefs.GetInt("SFX");
 
         for (int i = 1; i <= 60; i++)
         {
@@ -74,16 +72,4 @@ public class GameData : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    private void Start()
-    {
-        // Makes sure to unlock the achievements if they didn't unlock before
-        APIHandler api = GameObject.Find("API Handler").GetComponent<APIHandler>();
-
-        api.ngio_core.onReady(() =>
-        {
-            for (int i = 0; i < 16; i++)
-                if (PlayerPrefs.GetInt("Achievement" + i) == 1)
-                    api.UnlockMedal(62021 + i);
-        });
-    }
 }

@@ -103,7 +103,6 @@ public class LevelSelectButton : MonoBehaviour
     {
         if (unlocked && !GameObject.Find("GameData").GetComponent<GameData>().levelSelectAnimating)
         {
-            GameObject.Find("SFXManager").GetComponent<SFXScript>().PlaySFX("menu");
             GameObject.Find("GameData").GetComponent<GameData>().LevelToLoad = level;
             SceneManager.LoadScene(3);
         }

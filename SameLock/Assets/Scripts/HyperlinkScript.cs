@@ -52,7 +52,6 @@ public class HyperlinkScript : MonoBehaviour
             gd.AchievementsUnlocked[3] = 1;
             PlayerPrefs.SetInt("Achievement3", 1);
             PlayerPrefs.Save();
-            GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62024);
         }
         if(Application.isMobilePlatform)
             Application.OpenURL("https://locklegion.com/");
@@ -69,7 +68,6 @@ public class HyperlinkScript : MonoBehaviour
             gd.AchievementsUnlocked[2] = 1;
             PlayerPrefs.SetInt("Achievement2", 1);
             PlayerPrefs.Save();
-            GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62023);
         }
         if (Application.isMobilePlatform)
             Application.OpenURL("https://twitter.com/ChrisSkyRo");
@@ -84,8 +82,8 @@ public class HyperlinkScript : MonoBehaviour
         {
             "nothing",
             "here",
-            "https://chrisskyro.newgrounds.com",
-            "https://www.twitch.tv/jorrellds",
+            "https://twitter.com/ChrisSkyRo",
+            "https://lock-legion.newgrounds.com",
             "https://auberginelock.newgrounds.com",
             "https://chris-the-stick.newgrounds.com",
             "https://wonchop.newgrounds.com",
@@ -93,6 +91,7 @@ public class HyperlinkScript : MonoBehaviour
             "https://krebskopf.newgrounds.com",
             "https://courgetteclock.newgrounds.com",
             "https://rn86.newgrounds.com",
+            "https://staintocton.newgrounds.com",
             "https://thekursedone.newgrounds.com",
             "https://jujubelock.newgrounds.com",
             "https://leaflock.newgrounds.com",
@@ -112,10 +111,10 @@ public class HyperlinkScript : MonoBehaviour
             "https://uglyslug.newgrounds.com",
             "https://sir-davey.newgrounds.com",
             "https://madanimation.newgrounds.com",
-            "https://wizard-lock.newgrounds.com",
             "https://yarn.newgrounds.com",
             "https://chadsweb.newgrounds.com",
-            "https://twitter.com/TeraVex"
+            "https://twitter.com/iamKotoriSan",
+            "https://lock-legion.newgrounds.com"
         };
         if (Application.isMobilePlatform)
             Application.OpenURL(links[credit]);

@@ -34,7 +34,6 @@ public class ResetButton : MonoBehaviour
 
     private void OnMouseUp()
     {
-        GameObject.Find("SFXManager").GetComponent<SFXScript>().PlaySFX("reset");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

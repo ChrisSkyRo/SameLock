@@ -51,9 +51,10 @@ public class NextLevelButton : MonoBehaviour
 
     private void OnMouseUp()
     {
-        GameObject.Find("SFXManager").GetComponent<SFXScript>().PlaySFX("menu");
         GameData gd = GameObject.Find("GameData").GetComponent<GameData>();
-        if (gd.LevelToLoad == 15 || gd.LevelToLoad == 30 || gd.LevelToLoad == 45 || gd.LevelToLoad == 60)
+        if (gd.LevelToLoad == 60)
+            SceneManager.LoadScene(6);
+        else if (gd.LevelToLoad == 15 || gd.LevelToLoad == 30 || gd.LevelToLoad == 45)
             SceneManager.LoadScene(2);
         else {
             gd.LevelToLoad++;

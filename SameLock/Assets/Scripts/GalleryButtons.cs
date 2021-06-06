@@ -57,7 +57,6 @@ public class GalleryButtons : MonoBehaviour
                         PlayerPrefs.SetInt("Achievement12", 1);
                         PlayerPrefs.Save();
                         data.AchievementsUnlocked[12] = 1;
-                        GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62033);
                     }
                 }
                 else StartCoroutine(MoveRight());

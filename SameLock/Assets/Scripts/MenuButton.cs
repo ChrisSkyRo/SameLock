@@ -60,8 +60,6 @@ public class MenuButton : MonoBehaviour
 
     private void OnMouseUp()
     {
-        GameObject.Find("SFXManager").GetComponent<SFXScript>().PlaySFX("menu");
-
         GameData gd = GameObject.Find("GameData").GetComponent<GameData>();
         if (gd.levelSelectAnimating)
             return;
@@ -72,25 +70,14 @@ public class MenuButton : MonoBehaviour
             Animator an = GameObject.Find("SkyRollin").GetComponent<Animator>();
             an.SetTrigger("SkyInTrigger");
             gd.levelSelectAnimating = true;
-            if(gd.AchievementsUnlocked[5] == 0)
+            if (gd.AchievementsUnlocked[5] == 0)
             {
                 gd.AchievementsUnlocked[5] = 1;
                 PlayerPrefs.SetInt("Achievement5", 1);
                 PlayerPrefs.Save();
-                GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62026);
-
-                // Makes sure to unlock the achievements if they didn't unlock before
-                APIHandler api = GameObject.Find("API Handler").GetComponent<APIHandler>();
-
-                api.ngio_core.onReady(() =>
-                {
-                    for (int i = 0; i < 16; i++)
-                        if (PlayerPrefs.GetInt("Achievement" + i) == 1)
-                            api.UnlockMedal(62021 + i);
-                });
 
             }
-            if(gd.AchievementsUnlocked[15] == 0)
+            if (gd.AchievementsUnlocked[15] == 0)
             {
                 bool ok = true;
                 for (int i = 0; i < 15 && ok; i++)
@@ -101,11 +88,10 @@ public class MenuButton : MonoBehaviour
                     gd.AchievementsUnlocked[15] = 1;
                     PlayerPrefs.SetInt("Achievement15", 1);
                     PlayerPrefs.Save();
-                    GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62036);
                 }
             }
         }
-        else if(SceneIndex == 5)
+        else if (SceneIndex == 5)
         {
             count = true;
             Animator an = GameObject.Find("BB10Rollin").GetComponent<Animator>();
@@ -116,9 +102,13 @@ public class MenuButton : MonoBehaviour
                 gd.AchievementsUnlocked[4] = 1;
                 PlayerPrefs.SetInt("Achievement4", 1);
                 PlayerPrefs.Save();
-                GameObject.Find("API Handler").GetComponent<APIHandler>().UnlockMedal(62025);
             }
         }
-        else SceneManager.LoadScene(SceneIndex);
+        else
+        {
+            if (SceneIndex == 1)
+                gd.LevelToLoad = -1;
+            SceneManager.LoadScene(SceneIndex);
+        }
     }
 }

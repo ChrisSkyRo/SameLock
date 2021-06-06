@@ -37,7 +37,6 @@ public class SettingsButton : MonoBehaviour
 
     private void OnMouseUp()
     {
-        GameObject.Find("SFXManager").GetComponent<SFXScript>().PlaySFX("menu");
         if (open)
         {
             cam.position -= new Vector3(1337, 0);

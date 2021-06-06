@@ -11,4 +11,11 @@ public class ArtworkLockScript : MonoBehaviour
         if (GameObject.Find("GameData").GetComponent<GameData>().AchievementsUnlocked[index] == 1)
             Destroy(gameObject);
     }
+
+    private void Update()
+    {
+        if (index == 12)
+            if (GameObject.Find("GameData").GetComponent<GameData>().AchievementsUnlocked[index] == 1)
+                Destroy(gameObject);
+    }
 }
